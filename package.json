@@ -5,6 +5,8 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "psrm": "powershell Remove-Item ../Posicionador-Virtual-Control/dist",
+    "pscopy": "powershell  Copy-Item dist -Destination ../Posicionador-Virtual-Control/dist -Recurse",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {

@@ -1,15 +1,19 @@
 <template>
-<v-row dense class="offset">
-    <v-col sm="3">
+<v-row dense class="offset" justify="space-around">
+    <v-col sm="2">
     <v-text-field class="input-centered" v-model="axis" single-line disabled outlined>
     </v-text-field>
     </v-col>
-    <v-spacer></v-spacer>
-    <v-col sm="3">
+    <v-col sm="2">
     <v-text-field class="input-centered" v-model="currentOffset" single-line disabled outlined></v-text-field>
     </v-col>
-    <v-spacer></v-spacer>
-    <v-col sm="3">
+    <v-col sm="2">
+    <v-text-field class="input-centered" v-on:blur="changeOffset" v-model="desiredOffset" single-line outlined></v-text-field>
+    </v-col>
+    <v-col sm="2">
+    <v-text-field class="input-centered" v-on:blur="changeOffset" v-model="desiredOffset" single-line outlined></v-text-field>
+    </v-col>
+    <v-col sm="2">
     <v-text-field class="input-centered" v-on:blur="changeOffset" v-model="desiredOffset" single-line outlined></v-text-field>
     </v-col>
 </v-row>
@@ -22,6 +26,8 @@ export default {
         axis: Number,
         currentOffset: Number,
         desiredOffset: Number,
+        currentPosition: Number,
+        desiredPosition: Number,
     },
     methods: {
         changeOffset(){
@@ -29,7 +35,7 @@ export default {
         }
     },
     watch: {
-
+        
     }
 }
 </script>

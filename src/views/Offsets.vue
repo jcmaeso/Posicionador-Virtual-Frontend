@@ -1,17 +1,21 @@
 <template>
   <v-container>
     <h1>Offsets</h1>
-    <v-row dense class="offsets-header container">
-      <v-col sm="3">
+    <v-row dense class="offsets-header container" justify="space-around">
+      <v-col sm="2">
         <p>Eje</p>
       </v-col>
-      <v-spacer></v-spacer>
-      <v-col sm="3">
+      <v-col sm="2">
         <p>Offset Actual (º)</p>
       </v-col>
-      <v-spacer></v-spacer>
-      <v-col sm="3">
+      <v-col sm="2">
         <p>Offset Deseado (º)</p>
+      </v-col>
+      <v-col sm="2">
+        <p>Posición Actual(º)</p>
+      </v-col>
+      <v-col sm="2">
+        <p>Posición Deseada(º)</p>
       </v-col>
     </v-row>
     <Offset
@@ -21,15 +25,20 @@
       :axis="axis.number"
       :currentOffset="axis.currentOffset"
       :desiredOffset="axis.desiredOffset"
+      :currentPosition="axis.currentPosition"
+      :desiredPosition="axis.desiredPosition"
       v-on:desiredOffsetChanged="updateOffset"
     />
 
-    <v-row justify="space-around">
-      <v-col>
-        <v-btn @click="readOffsets">Leer Offsets</v-btn>
+    <v-row dense justify="space-around">
+      <v-col sm="2">
+        <v-btn @click="readOffsetsPositions">Leer Offsets y Posiciones</v-btn>
       </v-col>
-      <v-col>
+      <v-col sm="2">
         <v-btn @click="sendOffsets">Escribir Offsets</v-btn>
+      </v-col>
+      <v-col sm="2">
+        <v-btn @click="calcOffsets">Calcular Offsets</v-btn>
       </v-col>
     </v-row>
   </v-container>
@@ -65,15 +74,15 @@ export default {
     sendOffsets() {
       console.log(this.axises)
       if (typeof pywebview !== "undefined") {
-        this.axises.forEach(axis => {
+        this.axises.forEach(async axis => {
           if (axis.currentOffset !== axis.desiredOffset) {
             /* eslint-disable-next-line */
-            pywebview.api.PyWriteOffset(axis);
+            await pywebview.api.PyWriteOffset(axis);
           }
         });
       }
     },
-    readOffsets() {
+    readOffsetsPositions() {
       if (typeof pywebview !== "undefined") {
         /* eslint-disable-next-line */
         pywebview.api.PyReadOffsets().then(offsets => {
@@ -81,15 +90,27 @@ export default {
           this.axises = offsets;
         });
       }
+    },
+    calcOffsets(){
+      if (typeof pywebview !== "undefined") {
+        this.axises.forEach(async axis => {
+          if (axis.currentPosition !== axis.desiredPosition) {
+            /* eslint-disable-next-line */
+            axis = await pywebview.api.PyCalcOffset(axis);
+          }
+        });
+      }
     }
   },
+
+
   created() {
     if (typeof pywebview !== "undefined") {
       //alert("Entro en crear");
-      this.readOffsets()
+      this.readOffsetsPositions()
       return
     }
-    this.axises.push({ number: 0, currentOffset: 1, desiredOffset: 2 });
+    this.axises.push({ number: 0, currentOffset: 1, desiredOffset: 2, currentPosition: 180, desiredPosition: 180});
   },
 
 }

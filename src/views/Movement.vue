@@ -68,7 +68,7 @@
 							<p>Position: {{currentPosition}}</p>
 						</v-col>
 						<v-col sm="4">
-							<v-btn>Read Position</v-btn>
+							<v-btn @click="readPosition">Read Position</v-btn>
 						</v-col>
 					</v-row>
 				</v-card>
@@ -277,7 +277,18 @@ export default {
 						break;
 				}
 			}
-		}
+        },
+        async readPosition(){
+            /* eslint-disable-next-line */
+			if (typeof pywebview !== "undefined") {
+                /* eslint-disable-next-line */
+                let resp = await pywebview.api.PyReadPosition()
+                if(!resp){
+                    alert("Error reading position")
+                }
+                this.currentPosition = resp
+            } 
+        }
 	},
 	watch: {
 		systemSelected: function(val) {

@@ -258,22 +258,22 @@ export default {
 				switch (this.movementModeSelected.mode) {
                     case "MT":
                         /* eslint-disable-next-line */
-                        await pywebview.api.PyMoveTrack({
-                            direction: this.movementDirectionSelected.mode,
-                            speed: this.movementSpeed,
-                            target: this.movementTargetPosition,
-                            axis: this.axisSelected.number
-                        })
+                        await pywebview.api.PyMoveTrack(
+                            this.movementDirectionSelected.mode,
+                            this.movementSpeed,
+                            this.movementTargetPosition,
+                            this.axisSelected.number
+                        )
 						break;
 					case "MR":
                         /* eslint-disable-next-line */
-                        await pywebview.api.PyMoveTrack({
-                            speed: this.movementSpeed,
-                            startpos: this.movementStartPosition,
-                            endpos: this.movementEndPosition,
-                            increment: this.movementIncrement,
-                            axis: this.axisSelected.number
-                        })
+                        await pywebview.api.PyMoveRegister(
+                            this.movementSpeed,
+                            this.movementStartPosition,
+                            this.movementEndPosition,
+                            this.movementIncrement,
+                            this.axisSelected.number
+                        )
 						break;
 				}
 			}

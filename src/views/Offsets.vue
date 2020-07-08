@@ -18,7 +18,6 @@
 				<p>Posición Deseada(º)</p>
 			</v-col>
 		</v-row>
-
 		<v-row dense class="offset" justify="space-around" :key="id" v-for="(axis,id) in axes">
 			<v-col sm="2">
 				<v-text-field class="input-centered" v-model="axis.number" single-line disabled outlined></v-text-field>
@@ -136,8 +135,7 @@ export default {
 						(parseFloat(axis.desiredPosition) -
 							parseFloat(axis.currentPosition)).toFixed(2)
 				);
-			});
-
+            });
 			this.lockButtons = false;
 		}
 	},

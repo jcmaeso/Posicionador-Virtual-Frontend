@@ -11,10 +11,10 @@
     <v-text-field class="input-centered" v-on:blur="changeOffset" v-model="desiredOffset" single-line outlined></v-text-field>
     </v-col>
     <v-col sm="2">
-    <v-text-field class="input-centered" v-on:blur="changeOffset" v-model="desiredOffset" single-line outlined></v-text-field>
+    <v-text-field class="input-centered" disabled v-model="currentPosition" single-line outlined></v-text-field>
     </v-col>
     <v-col sm="2">
-    <v-text-field class="input-centered" v-on:blur="changeOffset" v-model="desiredOffset" single-line outlined></v-text-field>
+    <v-text-field class="input-centered" v-model="desiredPosition" single-line  outlined></v-text-field>
     </v-col>
 </v-row>
 </template>
@@ -31,8 +31,8 @@ export default {
     },
     methods: {
         changeOffset(){
-            this.$emit('desiredOffsetChanged',{axis: this.axis,currentOffset: this.currentOffset,desiredOffset: this.desiredOffset})
-        }
+            //this.$emit('desiredOffsetChanged',{axis: this.axis,currentOffset: this.currentOffset,desiredOffset: this.desiredOffset})
+        },
     },
     watch: {
         

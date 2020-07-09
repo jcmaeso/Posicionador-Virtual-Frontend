@@ -1,7 +1,8 @@
 <template>
 	<v-container>
+        <WaitDialog :dialog="lockButtons" :msg="displayMsg"/>
 		<v-row dense justify="space-around">
-			<v-col sm="2">
+			<v-col sm="3">
 				<v-combobox
 					class="py-3"
 					label="Sistema"
@@ -20,7 +21,7 @@
 					v-model="movementModeSelected"
 					:items="movementModes"
 				></v-combobox>
-				<v-btn @click="moveAxis">Mover Eje</v-btn>
+				<v-btn @click="moveAxis" :disabled="lockButtons">Mover Eje</v-btn>
 			</v-col>
 			<v-col sm="8" v-if="movementModeSelected.mode === 'MT'">
 				<v-card>
@@ -68,7 +69,7 @@
 							<p>Position: {{currentPosition}}</p>
 						</v-col>
 						<v-col sm="4">
-							<v-btn @click="readPosition">Read Position</v-btn>
+							<v-btn @click="readPosition" :disabled="lockButtons">Read Position</v-btn>
 						</v-col>
 					</v-row>
 				</v-card>
@@ -131,8 +132,13 @@
 </template>
 
 <script>
+import WaitDialog from "@/components/WaitDialog"
+
 export default {
-	name: "Mover",
+    name: "Mover",
+    components: {
+        WaitDialog
+    },
 	data() {
 		return {
 			systems: [
@@ -176,7 +182,9 @@ export default {
 			currentPosition: "0.00",
 			movementStartPosition: "0.00",
 			movementEndPosition: "180.00",
-			movementIncrement: "0.100"
+            movementIncrement: "0.100",
+            lockButtons: false,
+            displayMsg: ""
 		};
 	},
 	methods: {
@@ -242,23 +250,16 @@ export default {
 			}
 			this[key] = parseFloat(this[key]).toFixed(2);
 		},
-
-		async readPosition() {
-			/* eslint-disable-next-line */
-			if (typeof pywebview !== "undefined") {
-				/* eslint-disable-next-line */
-				this.currentPosition = await pywebview.api.PyReadPos(
-					this.axisSelected.number
-				);
-			}
-		},
 		async moveAxis() {
+            this.displayMsg = "Moviendo el eje"
+            this.lockButtons = true
             /* eslint-disable-next-line */
 			if (typeof pywebview !== "undefined") {
+                let resp
 				switch (this.movementModeSelected.mode) {
                     case "MT":
                         /* eslint-disable-next-line */
-                        await pywebview.api.PyMoveTrack(
+                        resp = await pywebview.api.PyMoveTrack(
                             this.movementDirectionSelected.mode,
                             this.movementSpeed,
                             this.movementTargetPosition,
@@ -267,7 +268,7 @@ export default {
 						break;
 					case "MR":
                         /* eslint-disable-next-line */
-                        await pywebview.api.PyMoveRegister(
+                        resp = await pywebview.api.PyMoveRegister(
                             this.movementSpeed,
                             this.movementStartPosition,
                             this.movementEndPosition,
@@ -275,19 +276,26 @@ export default {
                             this.axisSelected.number
                         )
 						break;
-				}
-			}
+                }
+                if(!resp){
+                    alert('Error moviendo el eje')
+                }
+            }
+            this.lockButtons = false
         },
         async readPosition(){
+            this.displayMsg = "Leyendo la posición"
+            this.lockButtons = true
             /* eslint-disable-next-line */
 			if (typeof pywebview !== "undefined") {
                 /* eslint-disable-next-line */
-                let resp = await pywebview.api.PyReadPosition()
+                let resp = await pywebview.api.PyReadPosition(this.axisSelected.number)
                 if(!resp){
-                    alert("Error reading position")
+                    alert("Error leyendo la posición")
                 }
                 this.currentPosition = resp
-            } 
+            }
+            this.lockButtons = false 
         }
 	},
 	watch: {
@@ -302,9 +310,9 @@ export default {
 	created() {
 		this.systemSelected = this.systems[0];
 		this.movementModeSelected = this.movementModes[0];
-		this.axisSelected = this.systemSelected.axes[0];
+		this.axisSelected = this.systemSelected.axes[0]; //This triggers read position
 		this.movementDirectionSelected = this.movementDirection[0];
-		this.readPosition();
+		//this.readPosition();
 	}
 };
 </script>

@@ -1,6 +1,6 @@
 <template>
 	<v-container>
-		<h1>Offsets</h1>
+        <WaitDialog :dialog="lockButtons" :msg="displayMgs"/>
 		<v-row dense class="offsets-header container" justify="space-around">
 			<v-col sm="2">
 				<p>Eje</p>
@@ -57,6 +57,8 @@
 </template>
 
 <script>
+
+
 export default {
 	name: "Offsets",
 	components: {
@@ -65,7 +67,8 @@ export default {
 		return {
 			axes: [],
 			filename: "",
-			lockButtons: false
+            lockButtons: false,
+            displayMsg: ""
 		};
 	},
 	methods: {
@@ -89,12 +92,13 @@ export default {
 			console.log(this.axes);
 		},
 		sendOffsets() {
+            this.displayMsg = "Escribiendo Offsets"
 			this.lockButtons = true;
 			if (typeof pywebview !== "undefined") {
 				this.axes.forEach(async axis => {
 					if (axis.currentOffset !== axis.desiredOffset) {
 						/* eslint-disable-next-line */
-						let resp = await pywebview.api.PyWriteOffset(axis);
+						let resp = await pywebview.api.PyWriteOffset(axis.number,axis.desiredOffset);
 						if (!resp) {
 							alert(
 								`Error escribiendo El offset de ${axis.number}`
@@ -108,6 +112,7 @@ export default {
 			this.lockButtons = false;
 		},
 		async readOffsetsPositions() {
+            this.displayMsg = "Leyendo Offsets y posiciones"
 			this.lockButtons = true;
 			if (typeof pywebview !== "undefined") {
 				/* eslint-disable-next-line */
@@ -120,7 +125,7 @@ export default {
 			this.lockButtons = false;
 		},
 		calcOffsets() {
-			console.log("Entro");
+            this.displayMsg = "Calculando Offsets"
 			this.lockButtons = true;
 			let wrapTo360 = angle => {
 				if (angle >= 0) {

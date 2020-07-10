@@ -23,8 +23,8 @@
 				></v-combobox>
 				<v-btn @click="moveAxis" :disabled="lockButtons">Mover Eje</v-btn>
 			</v-col>
-			<v-col sm="8" v-if="movementModeSelected.mode === 'MT'">
-				<v-card>
+			<v-col sm="8">
+				<v-card v-if="movementModeSelected.mode === 'MT'">
 					<v-row justify="space-around" dense>
 						<v-col sm="4">
 							<v-combobox
@@ -64,18 +64,8 @@
 							></v-text-field>
 						</v-col>
 					</v-row>
-					<v-row justify="space-around" dense>
-						<v-col sm="4">
-							<p>Position: {{currentPosition}}</p>
-						</v-col>
-						<v-col sm="4">
-							<v-btn @click="readPosition" :disabled="lockButtons">Read Position</v-btn>
-						</v-col>
-					</v-row>
 				</v-card>
-			</v-col>
-			<v-col sm="8" v-else-if="movementModeSelected.mode === 'MR'">
-				<v-card>
+				<v-card v-else-if="movementModeSelected.mode === 'MR'">
 					<v-row justify="space-around" dense>
 						<v-col sm="4">
 							<v-combobox
@@ -99,7 +89,7 @@
 							<v-text-field
 								class="input-centered"
 								v-model="movementStartPosition"
-								label="Posución Inicial"
+								label="Posición Inicial"
 								type="number"
 								outlined
 								:rules="[positionRule('movementStartPosition')]"
@@ -126,6 +116,16 @@
 						</v-col>
 					</v-row>
 				</v-card>
+                <v-card class="my-4 py-2">
+					<v-row justify="space-around" dense>
+						<v-col sm="4">
+							<p style="font-size: 20px; font-weight: bold;">Position: {{currentPosition}}</p>
+						</v-col>
+						<v-col sm="4">
+							<v-btn @click="readPosition" :disabled="lockButtons">Read Position</v-btn>
+						</v-col>
+					</v-row>
+                </v-card>
 			</v-col>
 		</v-row>
 	</v-container>
@@ -172,16 +172,16 @@ export default {
 			movementModeSelected: {},
 			axisSelected: {},
 			movementDirection: [
+                { mode: "d", name: "Auto" },
 				{ mode: "f", name: "Directa" },
 				{ mode: "r", name: "Inversa" },
-				{ mode: "d", name: "Auto" }
 			],
 			movementDirectionSelected: {},
 			movementSpeed: "90.0",
-			movementTargetPosition: "180.00",
+			movementTargetPosition: "0.00",
 			currentPosition: "0.00",
 			movementStartPosition: "0.00",
-			movementEndPosition: "180.00",
+			movementEndPosition: "0.00",
             movementIncrement: "0.100",
             lockButtons: false,
             displayMsg: ""
@@ -280,6 +280,7 @@ export default {
                 if(!resp){
                     alert('Error moviendo el eje')
                 }
+                this.currentPosition = resp
             }
             this.lockButtons = false
         },

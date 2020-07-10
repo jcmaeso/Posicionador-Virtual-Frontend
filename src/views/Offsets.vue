@@ -1,6 +1,6 @@
 <template>
 	<v-container>
-        <WaitDialog :dialog="lockButtons" :msg="displayMgs"/>
+        <WaitDialog :dialog="lockButtons" :msg="displayMsg"/>
 		<v-row dense class="offsets-header container" justify="space-around">
 			<v-col sm="2">
 				<p>Eje</p>
@@ -20,10 +20,10 @@
 		</v-row>
 		<v-row dense class="offset" justify="space-around" :key="id" v-for="(axis,id) in axes">
 			<v-col sm="2">
-				<v-text-field class="input-centered" v-model="axis.number" single-line disabled outlined></v-text-field>
+				<v-text-field class="input-centered" type="number" v-model="axis.number" single-line disabled outlined></v-text-field>
 			</v-col>
 			<v-col sm="2">
-				<v-text-field class="input-centered" v-model="axis.currentOffset" single-line disabled outlined></v-text-field>
+				<v-text-field class="input-centered" type="number" v-model="axis.currentOffset" single-line disabled outlined></v-text-field>
 			</v-col>
 			<v-col sm="2">
 				<v-text-field
@@ -35,10 +35,10 @@
 				></v-text-field>
 			</v-col>
 			<v-col sm="2">
-				<v-text-field class="input-centered" disabled v-model="axis.currentPosition" single-line outlined></v-text-field>
+				<v-text-field type="number" class="input-centered" disabled v-model="axis.currentPosition" single-line outlined></v-text-field>
 			</v-col>
 			<v-col sm="2">
-				<v-text-field v-on:blur="calcOffsets" class="input-centered" v-model="axis.desiredPosition" single-line outlined></v-text-field>
+				<v-text-field type="number" v-on:blur="calcOffsets" class="input-centered" v-model="axis.desiredPosition" single-line outlined></v-text-field>
 			</v-col>
 		</v-row>
 
@@ -57,11 +57,13 @@
 </template>
 
 <script>
+import WaitDialog from "@/components/WaitDialog"
 
 
 export default {
 	name: "Offsets",
 	components: {
+        WaitDialog
 	},
 	data() {
 		return {
@@ -112,7 +114,7 @@ export default {
 			this.lockButtons = false;
 		},
 		async readOffsetsPositions() {
-            this.displayMsg = "Leyendo Offsets y posiciones"
+            this.displayMsg = "Leyendo Offsets y Posiciones"
 			this.lockButtons = true;
 			if (typeof pywebview !== "undefined") {
 				/* eslint-disable-next-line */
@@ -136,9 +138,9 @@ export default {
 			console.log(this.axes);
 			this.axes.forEach(axis => {
 				axis.desiredOffset = wrapTo360(
-					parseFloat(axis.currentOffset) -
+					(parseFloat(axis.currentOffset) +
 						(parseFloat(axis.desiredPosition) -
-							parseFloat(axis.currentPosition)).toFixed(2)
+							parseFloat(axis.currentPosition))).toFixed(2)
 				);
             });
 			this.lockButtons = false;
@@ -148,15 +150,15 @@ export default {
 	created() {
 		if (typeof pywebview !== "undefined") {
 			//alert("Entro en crear");
-			this.readOffsetsPositions();
+			//this.readOffsetsPositions();
 			return;
 		}
 		this.axes.push({
 			number: 0,
-			currentOffset: 1,
-			desiredOffset: 2,
-			currentPosition: 3,
-			desiredPosition: 180
+			currentOffset: 161.8,
+			desiredOffset: 161.8,
+			currentPosition: 79.94,
+			desiredPosition: 79.94
 		});
 	}
 };

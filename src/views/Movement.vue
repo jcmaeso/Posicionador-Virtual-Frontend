@@ -1,6 +1,6 @@
 <template>
 	<v-container>
-        <WaitDialog :dialog="lockButtons" :msg="displayMsg"/>
+		<WaitDialog :dialog="lockButtons" :msg="displayMsg" />
 		<v-row dense justify="space-around">
 			<v-col sm="3">
 				<v-combobox
@@ -116,7 +116,7 @@
 						</v-col>
 					</v-row>
 				</v-card>
-                <v-card class="my-4 py-2">
+				<v-card class="my-4 py-2">
 					<v-row justify="space-around" dense>
 						<v-col sm="4">
 							<p style="font-size: 20px; font-weight: bold;">Position: {{currentPosition}}</p>
@@ -125,20 +125,20 @@
 							<v-btn @click="readPosition" :disabled="lockButtons">Read Position</v-btn>
 						</v-col>
 					</v-row>
-                </v-card>
+				</v-card>
 			</v-col>
 		</v-row>
 	</v-container>
 </template>
 
 <script>
-import WaitDialog from "@/components/WaitDialog"
+import WaitDialog from "@/components/WaitDialog";
 
 export default {
-    name: "Mover",
-    components: {
-        WaitDialog
-    },
+	name: "Mover",
+	components: {
+		WaitDialog
+	},
 	data() {
 		return {
 			systems: [
@@ -157,7 +157,7 @@ export default {
 					name: "Rango compacto",
 					axes: [
 						{ number: 1, min: 0, max: 359.99 },
-						{ number: 2, min: 0, max: 155 },
+						{ number: 2, min: 15, max: 260, inv: true },
 						{ number: 3, min: 0, max: 359.99 },
 						{ number: 4, min: 0, max: 240 },
 						{ number: 6, min: 0, max: 155 }
@@ -172,9 +172,9 @@ export default {
 			movementModeSelected: {},
 			axisSelected: {},
 			movementDirection: [
-                { mode: "d", name: "Auto" },
+				{ mode: "d", name: "Auto" },
 				{ mode: "f", name: "Directa" },
-				{ mode: "r", name: "Inversa" },
+				{ mode: "r", name: "Inversa" }
 			],
 			movementDirectionSelected: {},
 			movementSpeed: "90.0",
@@ -182,9 +182,9 @@ export default {
 			currentPosition: "0.00",
 			movementStartPosition: "0.00",
 			movementEndPosition: "0.00",
-            movementIncrement: "0.100",
-            lockButtons: false,
-            displayMsg: ""
+			movementIncrement: "0.100",
+			lockButtons: false,
+			displayMsg: ""
 		};
 	},
 	methods: {
@@ -206,10 +206,20 @@ export default {
 				return "La posición no es un numero";
 			}
 			position = parseFloat(position);
-			if (position < this.axisSelected.min) {
-				return `La posición es menor que el límite inferior ${this.axisSelected.min}`;
-			} else if (position > this.axisSelected.max) {
-				return `La posición es mayor que el límite superior ${this.axisSelected.max}`;
+			if (this.axisSelected.inv !== undefined) {
+				if (
+					position > this.axisSelected.min &&
+					position < this.axisSelected.max
+				) {
+					return `Posición fuera de limites (${this.axisSelected.max},${this.axisSelected.min})`;
+				}
+			} else {
+				if (
+					position < this.axisSelected.min ||
+					position > this.axisSelected.max
+				) {
+					return `Posición fuera de limites (${this.axisSelected.min},${this.axisSelected.max})`;
+				}
 			}
 			return true;
 		},
@@ -219,11 +229,17 @@ export default {
 				return "El incremento no es un número";
 			}
 			increment = parseFloat(increment).toFixed(3);
-            if (increment < 0.005) {
+			if (increment < 0.005) {
 				return "El incremento no puede ser menor que 0.005º";
 			} else if (increment > 49.999) {
 				return "El incremento no puede ser mayor que 49.999º";
-			} else if(((parseFloat(this.movementEndPosition)-parseFloat(this.movementStartPosition))*1000) % (increment*1000) !== 0) {
+			} else if (
+				((parseFloat(this.movementEndPosition) -
+					parseFloat(this.movementStartPosition)) *
+					1000) %
+					(increment * 1000) !==
+				0
+			) {
 				return "Las posiciones no son multiplo del incremento";
 			}
 			return true;
@@ -233,7 +249,9 @@ export default {
 				this.movementIncrement = 0.005;
 				return;
 			}
-			this.movementIncrement = parseFloat(this.movementIncrement).toFixed(3);
+			this.movementIncrement = parseFloat(this.movementIncrement).toFixed(
+				3
+			);
 		},
 		movementSpeedCorrect() {
 			if (this.speedRule(this.movementSpeed) !== true) {
@@ -245,59 +263,61 @@ export default {
 		movementTargetPositionCorrect(key) {
 			console.log(this[key]);
 			if (this.positionRule(key) !== true) {
-				this[key] = 0;
+				this[key] = this.axisSelected.min;
 				return;
 			}
 			this[key] = parseFloat(this[key]).toFixed(2);
 		},
 		async moveAxis() {
-            this.displayMsg = "Moviendo el eje"
-            this.lockButtons = true
-            /* eslint-disable-next-line */
+			this.displayMsg = "Moviendo el eje";
+			this.lockButtons = true;
+			/* eslint-disable-next-line */
 			if (typeof pywebview !== "undefined") {
-                let resp
+				let resp;
 				switch (this.movementModeSelected.mode) {
-                    case "MT":
-                        /* eslint-disable-next-line */
-                        resp = await pywebview.api.PyMoveTrack(
-                            this.movementDirectionSelected.mode,
-                            this.movementSpeed,
-                            this.movementTargetPosition,
-                            this.axisSelected.number
-                        )
+					case "MT":
+						/* eslint-disable-next-line */
+						resp = await pywebview.api.PyMoveTrack(
+							this.movementDirectionSelected.mode,
+							this.movementSpeed,
+							this.movementTargetPosition,
+							this.axisSelected.number
+						);
 						break;
 					case "MR":
-                        /* eslint-disable-next-line */
-                        resp = await pywebview.api.PyMoveRegister(
-                            this.movementSpeed,
-                            this.movementStartPosition,
-                            this.movementEndPosition,
-                            this.movementIncrement,
-                            this.axisSelected.number
-                        )
+						/* eslint-disable-next-line */
+						resp = await pywebview.api.PyMoveRegister(
+							this.movementSpeed,
+							this.movementStartPosition,
+							this.movementEndPosition,
+							this.movementIncrement,
+							this.axisSelected.number
+						);
 						break;
-                }
-                if(!resp){
-                    alert('Error moviendo el eje')
-                }
-                this.currentPosition = resp
-            }
-            this.lockButtons = false
-        },
-        async readPosition(){
-            this.displayMsg = "Leyendo la posición"
-            this.lockButtons = true
-            /* eslint-disable-next-line */
+				}
+				if (!resp) {
+					alert("Error moviendo el eje");
+				}
+				this.currentPosition = resp;
+			}
+			this.lockButtons = false;
+		},
+		async readPosition() {
+			this.displayMsg = "Leyendo la posición";
+			this.lockButtons = true;
+			/* eslint-disable-next-line */
 			if (typeof pywebview !== "undefined") {
-                /* eslint-disable-next-line */
-                let resp = await pywebview.api.PyReadPosition(this.axisSelected.number)
-                if(!resp){
-                    alert("Error leyendo la posición")
-                }
-                this.currentPosition = resp
-            }
-            this.lockButtons = false 
-        }
+				/* eslint-disable-next-line */
+				let resp = await pywebview.api.PyReadPosition(
+					this.axisSelected.number
+				);
+				if (!resp) {
+					alert("Error leyendo la posición");
+				}
+				this.currentPosition = resp;
+			}
+			this.lockButtons = false;
+		}
 	},
 	watch: {
 		systemSelected: function(val) {

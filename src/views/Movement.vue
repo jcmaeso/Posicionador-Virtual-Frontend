@@ -84,6 +84,14 @@
 								:rules="[speedRule]"
 								v-on:blur="movementSpeedCorrect"
 							></v-text-field>
+                            <v-combobox
+								label="Dirección"
+								item-text="name"
+								class="input-centered"
+								return-object
+								:items="movementDirection"
+								v-model="movementDirectionSelected"
+                            ></v-combobox>
 						</v-col>
 						<v-col sm="4">
 							<v-text-field
@@ -287,6 +295,7 @@ export default {
 					case "MR":
 						/* eslint-disable-next-line */
 						resp = await pywebview.api.PyMoveRegister(
+                            this.movementDirectionSelected.mode,
 							this.movementSpeed,
 							this.movementStartPosition,
 							this.movementEndPosition,
@@ -310,9 +319,10 @@ export default {
 				/* eslint-disable-next-line */
 				let resp = await pywebview.api.PyReadPosition(
 					this.axisSelected.number
-				);
-				if (!resp) {
-					alert("Error leyendo la posición");
+                );  
+				if (!resp && resp != 0) {
+                    alert("Error leyendo la posición");
+                    return;
 				}
 				this.currentPosition = resp;
 			}

@@ -12,6 +12,7 @@
       <v-tabs align-with-title>
         <v-tab :to="{name:'Offsets'}">Offsets</v-tab>
         <v-tab :to="{name:'Movement'}">Mover</v-tab>
+        <v-tab :to="{name:'Limits'}">Limites</v-tab>
       </v-tabs>
     </template>
   </v-app-bar>

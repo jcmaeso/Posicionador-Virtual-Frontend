@@ -34,13 +34,13 @@ export default {
 	name: "Limites",
 	components: {
 		Limit,
-		WaitDialog
+		WaitDialog,
 	},
 	data() {
 		return {
 			axes: [],
 			lockButtons: false,
-			displayMsg: ""
+			displayMsg: "",
 		};
 	},
 	created() {
@@ -53,14 +53,14 @@ export default {
 			lastForwardLimit: 161.8,
 			forwardLimit: 161.8,
 			reverseLimit: 161.9,
-			lastReverseLimit: 161.9
+			lastReverseLimit: 161.9,
 		});
 		this.axes.push({
 			number: 1,
 			lastForwardLimit: 161.8,
 			forwardLimit: 161.8,
 			reverseLimit: 161.9,
-			lastReverseLimit: 161.9
+			lastReverseLimit: 161.9,
 		});
 	},
 	methods: {
@@ -73,44 +73,50 @@ export default {
 				if (!resp) {
 					alert("Error leyendo los limites");
 				}
-                this.axes = resp;
-                this.axes.forEach(axis => {
-                        axis.lastReverseLimit = axis.reverseLimit
-                        axis.lastForwardLimit = axis.forwardLimit
-
-                })
+				this.axes = resp;
+				this.axes.forEach((axis) => {
+					axis.lastReverseLimit = axis.reverseLimit;
+					axis.lastForwardLimit = axis.forwardLimit;
+				});
 			}
-            this.lockButtons = false;
+			this.lockButtons = false;
 		},
 		async writeLimits() {
 			this.displayMsg = "Escribiendo Limites";
-            this.lockButtons = true;
-            //console.log(this.axes);
+			this.lockButtons = true;
+			//console.log(this.axes);
 			if (typeof pywebview !== "undefined") {
-                for(let i = 0; i < this.axes.length; i++){
-                    if (this.axes[i].forwardLimit !== this.axes[i].lastForwardLimit || this.axes[i].reverseLimit !== this.axes[i].lastReverseLimit) {
-                        /* eslint-disable-next-line */
-					    let resp = await pywebview.api.PyWriteLimit(
-							this.axes[i].number,
-                            this.axes[i].forwardLimit,
-                            this.axes[i].reverseLimit
-                        );
+				for (let i = 0; i < this.axes.length; i++) {
+					if (
+						this.axes[i].forwardLimit !==
+							this.axes[i].lastForwardLimit ||
+						this.axes[i].reverseLimit !==
+							this.axes[i].lastReverseLimit
+					) {
+						/* eslint-disable-next-line */
+						let resp = await pywebview.api.PyWriteLimit(
+							parseInt(this.axes[i].number),
+							parseFloat(this.axes[i].forwardLimit),
+							parseFloat(this.axes[i].reverseLimit)
+						);
 						if (!resp) {
-							alert(`Error escribiendo el limite de ${this.axes[i].number}`);
+							alert(
+								`Error escribiendo el limite de ${this.axes[i].number}`
+							);
 							return;
 						}
-                        this.axes[i].reverseLimit = resp.reverseLimit
-                        this.axes[i].lastReverseLimit = resp.reverseLimit
-                        this.axes[i].forwardLimit = resp.forwardLimit
-                        this.axes[i].lastForwardLimit = resp.forwardLimit	
+						this.axes[i].reverseLimit = resp.reverseLimit;
+						this.axes[i].lastReverseLimit = resp.reverseLimit;
+						this.axes[i].forwardLimit = resp.forwardLimit;
+						this.axes[i].lastForwardLimit = resp.forwardLimit;
 					}
-                }
-            }
-            console.log(this.axes);
-            console.log("He terminado");
+				}
+			}
+			console.log(this.axes);
+			console.log("He terminado");
 			this.lockButtons = false;
-		}
-	}
+		},
+	},
 };
 </script>
 
